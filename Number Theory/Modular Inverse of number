@@ -1,0 +1,7 @@
+vector<lli> inversemod(lli sz,lli mod)
+{
+    vector<lli>modi(sz);
+    modi[1]=1;
+    for(lli i=2;i<sz;i++)modi[i]=mod-((mod/i)*modi[mod%i])%mod;
+    return modi;
+}
