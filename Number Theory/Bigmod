@@ -1,0 +1,15 @@
+lli bigmod(lli base,lli power,lli mod)
+{
+    if(power==0)return 1;
+    else if(power%2==1)
+    {
+        lli p1=base%mod;
+        lli p2=(bigmod(base,power-1,mod))%mod;
+        return (p1*p2)%mod;
+    }
+    else if(power%2==0)
+    {
+        lli p1 = (bigmod(base,power/2,mod))%mod;
+        return (p1*p1)%mod;
+    }
+}
