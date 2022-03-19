@@ -1,3 +1,4 @@
+vector<lli>modi,faci;
 vector<lli> inversemod(lli sz,lli mod)
 {
     vector<lli>modi(sz);
@@ -5,3 +6,7 @@ vector<lli> inversemod(lli sz,lli mod)
     for(lli i=2;i<sz;i++)modi[i]=mod-((mod/i)*modi[mod%i])%mod;
     return modi;
 }
+///////////
+
+modi=inversemod(1000005,mod);
+faci=inversefac(1000005,mod);
