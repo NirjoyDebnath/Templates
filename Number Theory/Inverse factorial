@@ -5,6 +5,6 @@ vector<lli> inversefac(lli sz,lli mod)
     faci[1]=faci[0]=1;
     fac.pb(1);
     fac.pb(1);
-    for(lli i=2;i<sz;i++)faci[i]=(faci[i-1]*modi[i])%mod,fac.pb()=(fac[i-1]*i)%mod;
+    for(lli i=2;i<sz;i++)faci[i]=(faci[i-1]*modi[i])%mod,fac.pb((fac[i-1]*i)%mod);
     return faci;
 }
