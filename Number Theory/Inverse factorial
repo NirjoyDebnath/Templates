@@ -1,3 +1,4 @@
+vector<lli>fac;
 vector<lli> inversefac(lli sz,lli mod)
 {
     vector<lli>faci(sz);
