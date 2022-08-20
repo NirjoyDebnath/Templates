@@ -8,7 +8,7 @@ vector<lli>factorization_sieve(lli sz)
         if(sieve1[i]==0)
         {
             sieve1[i]=i;
-            for(lli j=i*i;j<=sz;j+=i*2)sieve1[j]=i;
+            for(lli j=i*i;j<=sz;j+=i*2)if(!sieve1[j])sieve1[j]=i;
         }
     }
     return sieve1;
