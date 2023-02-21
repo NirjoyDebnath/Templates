@@ -1,6 +1,6 @@
 vector<lli>modinverse(lli sz, lli mod)
 {
-    vector<lli>inv[sz+5];
+    vector<lli>inv(sz+5);
     inv[1]=1;
     for(lli i=2;i<=sz;i++)
     {
