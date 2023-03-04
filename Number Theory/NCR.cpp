@@ -30,6 +30,7 @@ struct ncr
     }
     lli calc(lli n,lli r)
     {
+        if(n<r)return 0;
         lli res=fac[n]*ifac[r];
         res%=MOD;
         res*=ifac[n-r];
