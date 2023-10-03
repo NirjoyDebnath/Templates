@@ -1,88 +1,47 @@
-template<typename T, typename U = T>
-struct SegmentTree {
-  int n;
-  vector<T> tree, arr;
-
-  // ----------
-
-  template<typename VAL_T>
-  T get_tree_val(VAL_T& val) {
-    return val;
-  }
-
-  T data_pull(T val_curr, U val_new) {
-    return (val_curr + val_new);
-  }
-
-  T merge(T a, T b) {
-    return (a + b);
-  }
-
-  // ----------
-
-  SegmentTree(int n = 0) : n(n) {
-    tree.resize(n<<2);
-  }
-
-  SegmentTree(int n, T val) : SegmentTree(n) {
-    fill(tree.begin(), tree.end(), val);
-  }
-
-  template<typename DATA_T>
-  SegmentTree(DATA_T& data) : SegmentTree((int)data.size()) {
-    __build(0, 0, n-1, data);
-  }
-
-  template<typename DATA_T>
-  void __build(int ti, int left, int right, DATA_T& data) {
-    if (left == right) {
-      tree[ti] = get_tree_val(data[left]);
-      return;
+template<typename T>
+struct segtree
+{
+    #define lc (n << 1)
+    #define rc ((n << 1) | 1)
+    vector<T>t,v; //t--> seg tree, v--> actual tree
+    int sz;
+    segtree(vector<T>&v):v(v),sz(v.size())
+    {
+        t.resize(sz*4);
+        build(1,0,sz-1);
     }
-
-    int tl, tr, tm;
-    tl = (ti<<1)+1;
-    tr = (ti<<1)+2;
-    tm = (left+right)>>1;
-
-    __build(tl, left, tm, data);
-    __build(tr, tm+1, right, data);
-    tree[ti] = merge(tree[tl], tree[tr]);
-  }
-
-  void __update(int ti, int left, int right, int ind, U val) {
-    if (left == right) {
-      tree[ti] = data_pull(tree[ti], val);
-      return;
+    T combine(T l,T r){return l+r;}
+    void build(int n,int l,int r)
+    {
+        if(l==r)
+        {
+            t[n]=v[l];
+            return;
+        }
+        int mid=(l+r)>>1;
+        build(lc,l,mid);
+        build(rc,mid+1,r);
+        t[n]=combine(t[lc],t[rc]);
     }
-
-    int tl, tr, tm;
-    tl = (ti<<1)+1;
-    tr = (ti<<1)+2;
-    tm = (left+right)>>1;
-
-    if (ind <= tm) __update(tl, left, tm, ind, val);
-      else __update(tr, tm+1, right, ind, val);
-    tree[ti] = merge(tree[tl], tree[tr]);
-  }
-
-  T __query(int ti, int left, int right, int l, int r) {
-    if ((l <= left) && (right <= r)) return tree[ti];
-
-    int tl, tr, tm;
-    tl = (ti<<1)+1;
-    tr = (ti<<1)+2;
-    tm = (left+right)>>1;
-
-    if (l > tm) return __query(tr, tm+1, right, l, r);
-    if (r <= tm) return __query(tl, left, tm, l, r);
-    return merge(
-      __query(tl, left, tm, l, r),
-      __query(tr, tm+1, right, l, r)
-    );
-  }
-
-  void update(int i, U val) { __update(0, 0, n-1, i, val); }
-  T query(int l, int r) { return __query(0, 0, n-1, l, r); }
+    void update(int n,int l,int r,int i,T val)
+    {
+        if(l==r&&l==i)
+        {
+            t[n]=t[n]+val; //add
+            //t[n]=val; //replace
+            return;
+        }
+        int mid=(l+r)>>1;
+        if(mid>=i)update(lc,l,mid,i,val);
+        else update(rc,mid+1,r,i,val);
+        t[n]=combine(t[lc],t[rc]);
+    }
+    T query(int n,int l,int r,int L,int R)
+    {
+        int mid=(l+r)>>1;
+        if(L<=l&&R>=r)return t[n];
+        else if(mid>=R)return query(lc,l,mid,L,R);
+        else if(mid<L)return query(rc,mid+1,r,L,R);
+        else return combine(query(lc,l,mid,L,R),query(rc,mid+1,r,L,R));
+    }
 };
-SegmentTree<ll> seg(n, 0);
