@@ -1,117 +1,65 @@
-template<typename T, typename L = T>
-struct SegmentTreeLazy {
-  int n;
-  vector<T> tree;
-  vector<L> lazy;
-
-  // ----------
-
-  template<typename VAL_T>
-  T get_tree_val(VAL_T& val) {
-    return val;
-  }
-
-  T merge(T a, T b) {
-    return (a + b);
-  }
-
-  T lazy_apply(T val_curr, L val_lazy, int l, int r) {
-    return (val_lazy * (r-l+1));
-  }
-
-  L lazy_pull(L val_curr, L val_new) {
-    return (val_new);
-  }
-
-  L DEF_LAZY = L();
-
-  // ----------
-
-  SegmentTreeLazy(int n = 0) : n(n) {
-    tree.resize(n<<2);
-    lazy.resize(n<<2);
-    fill(lazy.begin(), lazy.end(), DEF_LAZY);
-  }
-
-  SegmentTreeLazy(int n, T val) : SegmentTreeLazy(n) {
-    fill(tree.begin(), tree.end(), val);
-  }
-
-  template<typename VAL_T>
-  SegmentTreeLazy(vector<VAL_T>& data) : SegmentTreeLazy((int)data.size()) {
-    __build(0, 0, n-1, data);
-  }
-
-  template<typename VAL_T>
-  void __build(int ti, int left, int right, vector<VAL_T>& data) {
-    if (left == right) {
-      tree[ti] = get_tree_val(data[left]);
-      return;
+template<typename T,typename U=T>
+struct segtreelazy
+{
+    #define lc (n << 1)
+    #define rc ((n << 1) | 1)
+    vector<T>t,v; //t--> seg tree, v--> actual tree
+    vector<U>lz; //l--> lazy
+    int sz;
+    segtreelazy(vector<T>&v):v(v),sz(v.size())
+    {
+        t.resize(sz*4);
+        lz.resize(sz*4);
+        build(1,0,sz-1);
     }
-
-    int tl, tr, tm;
-    tl = (ti<<1)+1;
-    tr = (ti<<1)+2;
-    tm = (left+right)>>1;
-
-    __build(tl, left, tm, data);
-    __build(tr, tm+1, right, data);
-    tree[ti] = merge(tree[tl], tree[tr]);
-  }
-
-  void __push(int ti, int left, int right) {
-    if (lazy[ti] == DEF_LAZY) return;
-    tree[ti] = lazy_apply(tree[ti], lazy[ti], left, right);
-
-    int tl, tr;
-    tl = (ti<<1)+1;
-    tr = (ti<<1)+2;
-
-    if (left != right) {
-      lazy[tl] = lazy_pull(lazy[tl], lazy[ti]);
-      lazy[tr] = lazy_pull(lazy[tr], lazy[ti]);
+    T combine(T l,T r){return l+r;}
+    void push(int n,int l,int r)
+    {
+        if(lz[n]==0)return;
+        t[n]+=lz[n]*(r-l+1); //add
+        //t[n]=lz[n]*(r-l+1); //replace
+        if(l!=r)
+        {
+            lz[lc]+=lz[n]; //add
+            lz[rc]+=lz[n]; //add
+            //lz[lc]=lz[n]; //replace
+            //lz[rc]=lz[n]; //replace
+        }
+        lz[n]=0;
     }
-
-    lazy[ti] = DEF_LAZY;
-  }
-
-  void __update(int ti, int left, int right, int l, int r, L val) {
-    __push(ti, left, right);
-    if ((l > right) || (r < left)) return;
-    if ((l <= left) && (right <= r)) {
-      lazy[ti] = lazy_pull(lazy[ti], val);
-      __push(ti, left, right);
-      return;
+    void build(int n,int l,int r)
+    {
+        if(l==r)
+        {
+            t[n]=v[l];
+            return;
+        }
+        int mid=(l+r)>>1;
+        build(lc,l,mid);
+        build(rc,mid+1,r);
+        t[n]=combine(t[lc],t[rc]);
     }
-
-    int tl, tr, tm;
-    tl = (ti<<1)+1;
-    tr = (ti<<1)+2;
-    tm = (left+right)>>1;
-
-    __update(tl, left, tm, l, r, val);
-    __update(tr, tm+1, right, l, r, val);
-    tree[ti] = merge(tree[tl], tree[tr]);
-  }
-
-  T __query(int ti, int left, int right, int l, int r) {
-    __push(ti, left, right);
-    if ((l <= left) && (right <= r)) return tree[ti];
-
-    int tl, tr, tm;
-    tl = (ti<<1)+1;
-    tr = (ti<<1)+2;
-    tm = (left+right)>>1;
-
-    if (l > tm) return __query(tr, tm+1, right, l, r);
-    if (r <= tm) return __query(tl, left, tm, l, r);
-    return merge(
-      __query(tl, left, tm, l, r),
-      __query(tr, tm+1, right, l, r)
-    );
-  }
-
-  void update(int l, int r, L val) { __update(0, 0, n-1, l, r, val); }
-  T query(int l, int r) { return __query(0, 0, n-1, l, r); }
+    void update(int n,int l,int r,int L,int R,U val)
+    {
+        push(n,l,r);
+        if(L<=l&&R>=r)
+        {
+            lz[n]=val;
+            push(n,l,r);
+            return;
+        }
+        int mid=(l+r)>>1;
+        if(mid>=L)update(lc,l,mid,L,R,val);
+        if(mid<R)update(rc,mid+1,r,L,R,val);
+        t[n]=combine(t[lc],t[rc]);
+    }
+    T query(int n,int l,int r,int L,int R)
+    {
+        push(n,l,r);
+        int mid=(l+r)>>1;
+        if(L<=l&&R>=r)return t[n];
+        else if(mid>=R)return query(lc,l,mid,L,R);
+        else if(mid<L)return query(rc,mid+1,r,L,R);
+        else return combine(query(lc,l,mid,L,R),query(rc,mid+1,r,L,R));
+    }
 };
-SegmentTreeLazy<ll> st(a);
