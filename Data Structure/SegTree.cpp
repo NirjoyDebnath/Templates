@@ -1,4 +1,4 @@
-template<typename T>
+template<typename T,typename U=T>
 struct segtree
 {
     #define lc (n << 1)
@@ -23,7 +23,7 @@ struct segtree
         build(rc,mid+1,r);
         t[n]=combine(t[lc],t[rc]);
     }
-    void update(int n,int l,int r,int i,T val)
+    void update(int n,int l,int r,int i,U val)
     {
         if(l==r&&l==i)
         {
